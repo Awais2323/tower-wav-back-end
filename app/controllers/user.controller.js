@@ -222,18 +222,59 @@ exports.update = async (req, res) => {
       });
     }
   })
-    .catch(err => {
+};
+
+exports.updateTypeShift = async (req, res) => {
+  
+  CandidateProfile.update( {
+            candidate_type: req.body.candidate_type,
+            shift: req.body.shift,
+  }, {
+    where: { id: req.body.id },
+  }).then(num => {
+    if (num == 1) {
+      res.status(200).json({
+        status: 200,
+        success: false,
+        message: "Updated Successfully"
+      });
+    } else {
       res.status(500).json({
         status: 500,
         success: false,
-        message: "Error updating with id=" + req.userId
+        message: "No changes were made!"
       });
+    }
+  })
+};
+
+exports.updateDLDetail = async (req, res) => {
+CandidateProfile.update( {
+          DLN:req.body.DLN,
+          DOB: req.body.DOB,
+          zip_code: req.body.zip_code,
+}, {
+  where: { id: req.body.id },
+}).then(num => {
+  if (num == 1) {
+    res.status(200).json({
+      status: 200,
+      success: false,
+      message: "Updated Successfully"
     });
+  } else {
+    res.status(500).json({
+      status: 500,
+      success: false,
+      message: "No changes were made!"
+    });
+  }
+})
 };
 
 exports.updateCandidateNotes = async (req, res) => {
   
-  user.update( {
+  CandidateProfile.update( {
     notes: req.body.notes,
   }, {
     where: { id: req.body.id },

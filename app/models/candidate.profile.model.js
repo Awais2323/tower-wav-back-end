@@ -56,7 +56,13 @@ module.exports = (sequelize, Sequelize) => {
             },
             status_code: {
                 type: Sequelize.INTEGER 
-            }
+            },
+            candidate_type: {
+                type: Sequelize.STRING
+            },
+            shift: {
+                type: Sequelize.STRING 
+            },
         }, {
             timestamps: true,
             createdAt: true,

@@ -18,16 +18,16 @@ exports.signup = async (req, res) => {
       name: req.body.name
     });
 
-    if (req.body.roles) {
-      const roles = await Role.findAll({
+
+
+    if (req.body.roleId) {
+      const roles = await Role.findOne({
         where: {
-          name: {
-            [Op.or]: req.body.roles,
-          },
+          id: req.body.roleId
         },
       });
 
-      const result = user.setRoles(roles);
+      const result = user.setRoles([roles.id]);
       if (result)
         return res.status(200).json({
           status: 200,
@@ -36,7 +36,7 @@ exports.signup = async (req, res) => {
         });
     } else {
       // user has role = 1
-      const result = user.setRoles([1]);
+      const result = user.setRoles([3]);
       if (result)
         return res.status(200).json({
           status: 200,
