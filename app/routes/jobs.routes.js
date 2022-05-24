@@ -6,7 +6,7 @@ const jobPostController = require("../controllers/post.job.controller");
 module.exports = function (app) {
 
     //list of all jobs
-    app.post("/api/jobs/list/getAll", [authJwt.verifyToken], jobPostController.showAllJobs);
+    app.post("/api/jobs/list/getAll", jobPostController.showAllJobs);
     app.post("/api/jobs/list/getSearchJob", [authJwt.verifyToken], jobPostController.showSearchJobs);
     app.post("/api/jobs/list/getFilterJob",[authJwt.verifyToken], jobPostController.showFilterJobs);
     app.get("/api/jobs/list/getOne", jobsListController.showJobById);

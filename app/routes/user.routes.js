@@ -15,7 +15,7 @@ module.exports = function (app) {
     next();
   });
 
-  app.post("/api/user/profile/create", [authJwt.verifyToken], controller.createUpdate);
+  app.post("/api/user/profile/create", controller.createUpdate);
   app.put("/api/user/profile/update", [authJwt.verifyToken], controller.update);
   app.put("/api/user/profile/updateRole", [authJwt.verifyToken], controller.updateUserRole);
   app.post("/api/user/profile/getUserCandidates", [authJwt.verifyToken], controller.getUserCandidates);
