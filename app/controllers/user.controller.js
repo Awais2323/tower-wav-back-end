@@ -1,3 +1,4 @@
+const { isArray } = require("lodash");
 const { QueryTypes } = require("sequelize");
 const db = require("../models");
 const CandidateProfile = db.candidateProfile;
@@ -272,6 +273,27 @@ CandidateProfile.update( {
 })
 };
 
+exports.updateCandidate = async (req, res) => {
+  console.log(res.body)
+  CandidateProfile.update(req.body.attributes, {
+    where: { id: req.body.id },
+  }).then(num => {
+    if (num == 1) {
+      res.status(200).json({
+        status: 200,
+        success: false,
+        message: "Updated Successfully"
+      });
+    } else {
+      res.status(500).json({
+        status: 500,
+        success: false,
+        message: "No changes were made!"
+      });
+    }
+  })
+  };
+
 exports.updateCandidateNotes = async (req, res) => {
   
   CandidateProfile.update( {
@@ -406,7 +428,30 @@ exports.showSearchUsers = async (req, res) => {
       });
   } else {
       await CandidateProfile.findAll({
-          where: { client_id, [Op.or]: [{'$post_job.job_title$': { [Op.like]: `%${term}%` }},{'$post_job.state_name$': { [Op.like]: `%${term}%` }},{'$post_job.city_name$': { [Op.like]: `%${term}%` }},{source: { [Op.like]: `%${term}%` }},{status: { [Op.like]: `%${term}%` }}, ] },
+        where: {
+          client_id, [Op.or]: [{ '$post_job.job_title$': { [Op.like]: `%${term}%` } }, { '$post_job.state_name$': { [Op.like]: `%${term}%` } }, { '$post_job.city_name$': { [Op.like]: `%${term}%` } }, { source: { [Op.like]: `%${term}%` } }, { status: { [Op.like]: `%${term}%` } },
+          {first_name: { [Op.like]: `%${term}%` }},
+          {last_name: { [Op.like]: `%${term}%` }}, 
+          {email: { [Op.like]: `%${term}%` }}, 
+          {phone_number: { [Op.like]: `%${term}%` }}, 
+          {notes: { [Op.like]: `%${term}%` }}, 
+          {DLN: { [Op.like]: `%${term}%` }},
+          {zip_code: { [Op.like]: `%${term}%` }}, 
+          {status: { [Op.like]: `%${term}%` }}, 
+          {candidate_type: { [Op.like]: `%${term}%` }},
+          {shift: { [Op.like]: `%${term}%` }}, 
+          {profile_photo: { [Op.like]: `%${term}%` }}, 
+          {BGC: { [Op.like]: `%${term}%` }}, 
+          {drug_test: { [Op.like]: `%${term}%` }}, 
+          {training: { [Op.like]: `%${term}%` }}, 
+          {service: { [Op.like]: `%${term}%` }}, 
+          {hire_or_not: { [Op.like]: `%${term}%` }},
+          {service_status: { [Op.like]: `%${term}%` }}, 
+          {bonus_status: { [Op.like]: `%${term}%` }}, 
+          {service_driver: { [Op.like]: `%${term}%` }}, 
+          {service_deactive: { [Op.like]: `%${term}%` }},
+          ]
+        },
         include: [userJob, user],
       })
           .then(data => {
@@ -429,11 +474,19 @@ exports.showSearchUsers = async (req, res) => {
 exports.showFilterUsers = async (req, res) => {
   const clientId = req.body.clientId;
   const filter = req.body.filter;
-  const jobState = filter.state.map(state => state.name);
-  const jobCitys = filter.city.map(city => city.name);
-  const jobs = filter.jobs.map(job => job.id);
-  const status = filter.status?.value;
-  const source = filter.source?.value;
+  const jobState = isArray(filter.state) ? filter.state.map(state => state.name) : [];
+  const jobCitys = isArray(filter.city) ?  filter.city.map(city => city.name): [];
+  const jobs = isArray(filter.job) ? filter.jobs.map(job => job.id): [];
+
+  const status = filter.status?.value ? [filter.status?.value] : [];
+  const source = filter.source?.value ? [filter.source?.value] : [];
+
+  const profile= filter.profile?.value ? [filter.profile.value] : []; 
+  const DL= filter.DL?.value ? [filter.DL.value] : []; 
+  const BC= filter.BC?.value ? [filter.BC.value] : []; 
+  const DT= filter.DT?.value ? [filter.DT.value] : []; 
+  const Training= filter.Training?.value ? [filter.Training.value] : []; 
+  const hiring= filter.hiring?.value ? [filter.hiring.value] : []; 
 
   if (!clientId && filter) {
       res.status(403).json({
@@ -446,14 +499,20 @@ exports.showFilterUsers = async (req, res) => {
       const jobsByState = await CandidateProfile.findAll({
           where: {
               client_id: clientId,
-              [Op.and]: [{
-                  '$post_job.state_name$': jobState
-              },
-                { '$post_job.city_name$': jobCitys, },
-                { jobId: jobs },
-                { status_code: status },
-              {source: source}
-              ]
+              [Op.and]: [  jobState.lenght > 0 && {
+                '$post_job.state_name$': jobState
+            },
+            jobCitys.lenght > 0 &&{ '$post_job.city_name$': jobCitys },
+            jobs.lenght > 0 && { jobId: jobs },
+            status.lenght > 0 &&  { status: status },
+              source.lenght > 0 && { source: source },
+              profile.length > 0 && { profile_photo: profile },
+              DL.length > 0 && { DLN_status: DL},
+              BC.length > 0 && { BGC: BC},
+              DT.length > 0 && { drug_test: DT},
+              Training.length > 0 && { training: Training},
+              hiring.length > 0 && { hire_or_not: hiring},
+            ]
           },
           include: [userJob,user]
       });
@@ -565,6 +624,8 @@ exports.showSearchUsersByUser = async (req, res) => {
   const userId = req.body.userId;
   const term = req.body.term;
 
+  console.log(client_id,userId,term)
+
   if (!client_id && !term) {
       res.status(403).json({
           status: 403,
@@ -573,7 +634,30 @@ exports.showSearchUsersByUser = async (req, res) => {
       });
   } else {
       await CandidateProfile.findAll({
-          where: { client_id,userId, [Op.or]: [{'$post_job.job_title$': { [Op.like]: `%${term}%` }},{'$post_job.state_name$': { [Op.like]: `%${term}%` }},{'$post_job.city_name$': { [Op.like]: `%${term}%` }},{source: { [Op.like]: `%${term}%` }},{status: { [Op.like]: `%${term}%` }}, ] },
+        where: {
+          client_id, userId, [Op.or]: [{ '$post_job.job_title$': { [Op.like]: `%${term}%` } }, { '$post_job.state_name$': { [Op.like]: `%${term}%` } }, { '$post_job.city_name$': { [Op.like]: `%${term}%` } }, { source: { [Op.like]: `%${term}%` } }, { status: { [Op.like]: `%${term}%` } }, { status: { [Op.like]: `%${term}%` } },
+          {first_name: { [Op.like]: `%${term}%` }},
+          {last_name: { [Op.like]: `%${term}%` }}, 
+          {email: { [Op.like]: `%${term}%` }}, 
+          {phone_number: { [Op.like]: `%${term}%` }}, 
+          {notes: { [Op.like]: `%${term}%` }}, 
+          {DLN: { [Op.like]: `%${term}%` }},
+          {zip_code: { [Op.like]: `%${term}%` }}, 
+          {status: { [Op.like]: `%${term}%` }}, 
+          {candidate_type: { [Op.like]: `%${term}%` }},
+          {shift: { [Op.like]: `%${term}%` }}, 
+          {profile_photo: { [Op.like]: `%${term}%` }}, 
+          {BGC: { [Op.like]: `%${term}%` }}, 
+          {drug_test: { [Op.like]: `%${term}%` }}, 
+          {training: { [Op.like]: `%${term}%` }}, 
+          {service: { [Op.like]: `%${term}%` }}, 
+          {hire_or_not: { [Op.like]: `%${term}%` }},
+          {service_status: { [Op.like]: `%${term}%` }}, 
+          {bonus_status: { [Op.like]: `%${term}%` }}, 
+          {service_driver: { [Op.like]: `%${term}%` }}, 
+          {service_deactive: { [Op.like]: `%${term}%` }},
+          ]
+        },
         include: [userJob, user],
       })
           .then(data => {
@@ -597,13 +681,31 @@ exports.showFilterUsersByUser = async (req, res) => {
   const clientId = req.body.clientId;
   const userId = req.body.userId;
   const filter = req.body.filter;
-  const jobState = filter.state.map(state => state.name);
-  const jobCitys = filter.city.map(city => city.name);
-  const jobs = filter.jobs.map(job => job.id);
-  const status = filter.status?.value;
-  const source = filter.source?.value;
+  const jobState = isArray(filter.state) ? filter.state.map(state => state.name) : [];
+  const jobCitys = isArray(filter.city) ?  filter.city.map(city => city.name): [];
+  const jobs = isArray(filter.job) ? filter.jobs.map(job => job.id): [];
+  const status = filter.status?.value ? [filter.status?.value] : [];
+  const source = filter.source?.value ? [filter.source?.value] : [];
 
-  if (!clientId && filter) {
+  const profile= filter.profile?.value ? [filter.profile.value] : []; 
+  const DL= filter.DL?.value ? [filter.DL.value] : []; 
+  const BC= filter.BC?.value ? [filter.BC.value] : []; 
+  const DT= filter.DT?.value ? [filter.DT.value] : []; 
+  const Training= filter.Training?.value ? [filter.Training.value] : []; 
+  const hiring= filter.hiring?.value ? [filter.hiring.value] : []; 
+  
+
+  console.log(clientId , filter , jobState ,
+    jobCitys,
+    jobs ,
+    status ,
+    source)
+
+  if (!clientId && !filter && !jobState &&
+!jobCitys&&
+!jobs &&
+!status &&
+!source) {
       res.status(403).json({
           status: 403,
           success: false,
@@ -615,13 +717,19 @@ exports.showFilterUsersByUser = async (req, res) => {
           where: {
           client_id: clientId,
           userId,
-              [Op.and]: [{
+              [Op.and]: [  jobState.lenght > 0 && {
                   '$post_job.state_name$': jobState
               },
-                { '$post_job.city_name$': jobCitys, },
-                { jobId: jobs },
-                { status_code: status },
-              {source: source}
+              jobCitys.lenght > 0 &&{ '$post_job.city_name$': jobCitys },
+              jobs.lenght > 0 && { jobId: jobs },
+              status.lenght > 0 &&  { status: status },
+                source.lenght > 0 && { source: source },
+                profile.length > 0 && { profile_photo: profile },
+                DL.length > 0 && { DLN_status: DL},
+                BC.length > 0 && { BGC: BC},
+                DT.length > 0 && { drug_test: DT},
+                Training.length > 0 && { training: Training},
+                hiring.length > 0 && { hire_or_not: hiring},
               ]
           },
           include: [userJob,user]

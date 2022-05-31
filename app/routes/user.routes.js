@@ -22,6 +22,7 @@ module.exports = function (app) {
   app.put("/api/user/profile/updateCandidateNotes", [authJwt.verifyToken], controller.updateCandidateNotes);
   app.put("/api/user/profile/updateDLDetail", [authJwt.verifyToken], controller.updateDLDetail);
   app.put("/api/user/profile/updateTypeShift", [authJwt.verifyToken], controller.updateTypeShift);
+  app.put("/api/user/profile/updateCandidate", [authJwt.verifyToken], controller.updateCandidate);
   app.post("/api/user/profile/getAllEmployees", [authJwt.verifyToken], controller.getAllEmployees)
   app.get("/api/user/profile/getAllRoles", controller.getAllRoles)
   app.get("/api/user/profile/getAllUsersRoles", controller.getAllUsersRoles)
