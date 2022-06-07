@@ -29,6 +29,12 @@ module.exports = (sequelize, Sequelize) => {
         },
         city_name: {
             type: Sequelize.STRING
+            },
+        partner: {
+            type: Sequelize.STRING
+        },
+        shift: {
+            type: Sequelize.STRING
         },
     }, {
         timestamps: true,

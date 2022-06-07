@@ -110,7 +110,13 @@ module.exports = (sequelize, Sequelize) => {
             },
             DLN_status: {
                 type: Sequelize.STRING
-            }
+            },
+            state_name: {
+                type: Sequelize.STRING
+            },
+            city_name: {
+                type: Sequelize.STRING
+            },
 
 
         }, {

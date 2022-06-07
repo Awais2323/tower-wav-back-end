@@ -1,4 +1,5 @@
 const db = require("../models");
+const { isArray } = require("lodash");
 const userJob = db.postJob;
 const User = db.user;
 const CandidateProfile = db.candidateProfile;
@@ -90,8 +91,18 @@ exports.showSearchJobs = async (req, res) => {
 exports.showFilterJobs = async (req, res) => {
     const clientId = req.body.clientId;
     const filter = req.body.filter;
-    const jobState = filter.state.map(state => state.name);
-    const jobCitys = filter.city.map(city => city.name);
+
+    const jobState = isArray(filter.state) ? filter.state.map(state => state.name) : [];
+    const jobCitys = isArray(filter.city) ?  filter.city.map(city => city.name): [];
+  
+    const partner = filter.partner?.value ? [filter.partner?.value] : [];
+    const shift = filter.shift?.value ? [filter.shift?.value] : [];
+
+    console.log(jobState, jobCitys, partner, shift);
+    console.log(jobState.length,
+        jobCitys.length ,
+        partner.length,
+        shift.length);
 
     if (!clientId && filter) {
         res.status(403).json({
@@ -104,11 +115,14 @@ exports.showFilterJobs = async (req, res) => {
         const jobsByState = await userJob.findAll({
             where: {
                 clientId,
-                [Op.or]: [{
+                [Op.and]: [
+                    jobState.length > 0 && {
                     state_name: jobState
                 },
-                {city_name: jobCitys,}
-                ]
+                jobCitys.length > 0 && { city_name: jobCitys, },      
+                partner.length > 0 && { partner: partner, },      
+                shift.length > 0 && { shift: shift, }      
+            ]
             },
             include: [User, CandidateProfile]
         });

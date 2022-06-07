@@ -486,7 +486,9 @@ exports.showFilterUsers = async (req, res) => {
   const BC= filter.BC?.value ? [filter.BC.value] : []; 
   const DT= filter.DT?.value ? [filter.DT.value] : []; 
   const Training= filter.Training?.value ? [filter.Training.value] : []; 
-  const hiring= filter.hiring?.value ? [filter.hiring.value] : []; 
+  const hiring = filter.hiring?.value ? [filter.hiring.value] : [];
+  const partner = filter.partner?.value ? [filter.partner.value] : [];
+  const shift= filter.shift?.value ? [filter.shift.value] : [];
 
   if (!clientId && filter) {
       res.status(403).json({
@@ -499,19 +501,21 @@ exports.showFilterUsers = async (req, res) => {
       const jobsByState = await CandidateProfile.findAll({
           where: {
               client_id: clientId,
-              [Op.and]: [  jobState.lenght > 0 && {
+              [Op.and]: [  jobState.length > 0 && {
                 '$post_job.state_name$': jobState
             },
-            jobCitys.lenght > 0 &&{ '$post_job.city_name$': jobCitys },
-            jobs.lenght > 0 && { jobId: jobs },
-            status.lenght > 0 &&  { status: status },
-              source.lenght > 0 && { source: source },
+            jobCitys.length > 0 &&{ '$post_job.city_name$': jobCitys },
+            jobs.length > 0 && { jobId: jobs },
+            status.length > 0 &&  { status: status },
+              source.length > 0 && { source: source },
               profile.length > 0 && { profile_photo: profile },
               DL.length > 0 && { DLN_status: DL},
               BC.length > 0 && { BGC: BC},
               DT.length > 0 && { drug_test: DT},
               Training.length > 0 && { training: Training},
-              hiring.length > 0 && { hire_or_not: hiring},
+                hiring.length > 0 && { hire_or_not: hiring },
+                partner.length > 0 && { service: partner },
+                shift.length > 0 && { shift: shift},
             ]
           },
           include: [userJob,user]
@@ -692,7 +696,9 @@ exports.showFilterUsersByUser = async (req, res) => {
   const BC= filter.BC?.value ? [filter.BC.value] : []; 
   const DT= filter.DT?.value ? [filter.DT.value] : []; 
   const Training= filter.Training?.value ? [filter.Training.value] : []; 
-  const hiring= filter.hiring?.value ? [filter.hiring.value] : []; 
+  const hiring = filter.hiring?.value ? [filter.hiring.value] : [];
+  const partner = filter.partner?.value ? [filter.partner.value] : [];
+  const shift= filter.shift?.value ? [filter.shift.value] : [];
   
 
   console.log(clientId , filter , jobState ,
@@ -717,19 +723,21 @@ exports.showFilterUsersByUser = async (req, res) => {
           where: {
           client_id: clientId,
           userId,
-              [Op.and]: [  jobState.lenght > 0 && {
+              [Op.and]: [  jobState.length > 0 && {
                   '$post_job.state_name$': jobState
               },
-              jobCitys.lenght > 0 &&{ '$post_job.city_name$': jobCitys },
-              jobs.lenght > 0 && { jobId: jobs },
-              status.lenght > 0 &&  { status: status },
-                source.lenght > 0 && { source: source },
+              jobCitys.length > 0 &&{ '$post_job.city_name$': jobCitys },
+              jobs.length > 0 && { jobId: jobs },
+              status.length > 0 &&  { status: status },
+                source.length > 0 && { source: source },
                 profile.length > 0 && { profile_photo: profile },
                 DL.length > 0 && { DLN_status: DL},
                 BC.length > 0 && { BGC: BC},
                 DT.length > 0 && { drug_test: DT},
                 Training.length > 0 && { training: Training},
-                hiring.length > 0 && { hire_or_not: hiring},
+                hiring.length > 0 && { hire_or_not: hiring },
+                partner.length > 0 && { service: partner },
+                shift.length > 0 && { shift: shift},
               ]
           },
           include: [userJob,user]
